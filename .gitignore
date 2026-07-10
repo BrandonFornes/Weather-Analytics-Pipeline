@@ -1,0 +1,46 @@
+# ==========================================
+# 🔐 SEGURIDAD: Credenciales y API Keys
+# ==========================================
+.env
+# ==========================================
+# 💾 DATA LAKE: No subir datos locales a GitHub
+# ==========================================
+# Ignora todos los archivos JSON y Parquet generados localmente
+data/
+dags/logs/
+dags/__pycache__/
+logs/
+
+# ==========================================
+# 🐍 PYTHON: Entornos virtuales y Caches
+# ==========================================
+venv/
+.venv/
+env/
+__pycache__/
+
+# ==========================================
+# ✨ SPARK & METADATA: Archivos temporales de ejecución
+# ==========================================
+.spark_metadata/
+metastore_db/
+derby.log
+checkpoint/
+*_SUCCESS
+*.crc
+spark_temp/
+
+# ==========================================
+# 💻 IDEs y Sistema Operativo
+# ==========================================
+.vscode/
+.idea/
+.DS_Store
+# ==========================================
+
+# 🪟 WINDOWS-SPECIFIC: Hadoop Winutils Binaries
+# ==========================================
+hadoop/
+winutils/
+bin/winutils.exe
+bin/hadoop.dll
