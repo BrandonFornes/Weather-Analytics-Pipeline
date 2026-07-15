@@ -53,18 +53,19 @@ Building an integrated distributed system locally introduces real-world infrastr
 
 - **Issue**: The Spark script running inside the Airflow container crashed with a `TimeoutException` trying to connect to `localhost:9092`.
 - **Cause**: Inside a container, `localhost` maps to its own isolated workspace rather than the host machine hosting the Kafka broker.
-- **Solution**: Configured a dual-listener network setup in `docker-compose.yml`. An `INTERNAL` listener was mapped to `kafka:29092` for secure inter-container communication (Airflow to Kafka), while an `EXTERNAL` port was kept at `localhost:9092` for local machine tasks and Power BI consumption.
+- **Solution**: Configured dual-listeners in docker-compose.yml: an INTERNAL listener at kafka:29092 for secure inter-container traffic (Airflow to Kafka) and an EXTERNAL listener at localhost:9092 for local machine tasks and Power BI consumption.
 
 ### 2. Spark Parquet Schema Inference Failures
 
-- **Issue**: During initial runs or directory clears, the Gold layer batch script aborted with an `AnalysisException: Unable to infer schema for Parquet`.
-- **Cause**: Spark's default `.read.parquet()` triggers an automatic scan to infer column names. If the directory is pristine or holds partial 0-byte operational metadata files, inference fails instantly.
+- **Issue**: The Gold layer batch script aborted with an AnalysisException: Unable to infer schema for Parquet during clean runs.
+- **Cause**: Spark's default .read.parquet() triggers auto-inference for column names, which fails instantly if the destination directory is pristine or holds only 0-byte operational metadata files.
 - **Solution**: Enforced an explicit strict schema design using PySpark's `StructType` and `StructField`. Applying `.schema(data_schema).parquet(path)` bypassed inference completely, increasing performance and protecting the DAG execution line.
 - 
 ### 3. Windows Native Spark Execution and Missing Hadoop Binaries (`winutils.exe`)
-* **Issue**: Local testing of PySpark scripts natively on Windows caused an immediate crash during file write operations, throwing a Java runtime exception: `java.io.IOException: Cannot run program "winutils.exe": CreateProcess error=2`.
-* **Cause**: Apache Spark was natively built to run on Linux environments and inherently relies on Hadoop client libraries to handle low-level disk tasks and file permissions (`chmod`). When running Spark directly on Windows, the underlying Java virtual machine requires a specialized Windows native translation layout—specifically `winutils.exe` and `hadoop.dll`—to execute these system access routines. Without them, Spark panics and aborts execution.
-* **Solution**: The required lightweight Windows binary files were extracted from the public [cdarlint/winutils](https://github.com/cdarlint/winutils) repository and safely contained inside a localized `/hadoop/bin` directory within the workspace. Then, a bootstrap sequence using Python's `platform` library was injected at the script's entry point. It intercepts execution to dynamically set `HADOOP_HOME` and update the runtime environment variables **only** when a Windows host is detected.
+* **Issue**: Local testing of PySpark scripts natively on Windows caused a java.io.IOException: Cannot run program "winutils.exe" crash during file writes.
+  
+* **Cause**: Spark is built for Linux and expects POSIX-compliant file permissions (chmod). Windows (NTFS) lacks these native endpoints and requires translation tools (winutils.exe and hadoop.dll) to interact with local disk states.
+* **Solution**: Staged the minimal required Windows binaries from the public cdarlint/winutils repository in a local project folder. Injected a Python bootstrap script using the platform library to dynamically set HADOOP_HOME and system paths only when a Windows host is detected, maintaining a fully environment-agnostic pipeline.
 
 ## 💻 How to Run This Project Locally
 
