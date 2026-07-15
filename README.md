@@ -60,7 +60,7 @@ Building an integrated distributed system locally introduces real-world infrastr
 - **Issue**: The Gold layer batch script aborted with an AnalysisException: Unable to infer schema for Parquet during clean runs.
 - **Cause**: Spark's default .read.parquet() triggers auto-inference for column names, which fails instantly if the destination directory is pristine or holds only 0-byte operational metadata files.
 - **Solution**: Enforced an explicit strict schema design using PySpark's `StructType` and `StructField`. Applying `.schema(data_schema).parquet(path)` bypassed inference completely, increasing performance and protecting the DAG execution line.
-- 
+
 ### 3. Windows Native Spark Execution and Missing Hadoop Binaries (`winutils.exe`)
 * **Issue**: Local testing of PySpark scripts natively on Windows caused a java.io.IOException: Cannot run program "winutils.exe" crash during file writes.
   
