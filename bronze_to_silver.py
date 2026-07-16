@@ -36,6 +36,7 @@ df_kafka_stream = (spark.readStream
     .option("kafka.bootstrap.servers", "kafka:29092")
     .option("subscribe", "weather-raw")
     .option("startingOffsets", "earliest")
+    .option("failOnDataLoss", "false")
     .load())
 
 main_schema = StructType([
