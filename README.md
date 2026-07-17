@@ -2,7 +2,11 @@
 
 An automated, event-driven data engineering pipeline that ingests real-time weather metrics, streams them through a message broker, runs multi-layer transformations, and serves a consolidated analytical reporting dashboard.
 
-<video src="assets/demo.mp4" controls width="100%" max-width="800px"></video>
+
+
+https://github.com/user-attachments/assets/0ee293df-2abb-4791-98a1-360b6d2d072f
+
+
 
 ## Tech Stack & Core Technologies
 
