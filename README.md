@@ -1,23 +1,19 @@
 # End-to-End Weather Analytics Pipeline (Medallion Architecture)
 
-An automated, event-driven data engineering pipeline that ingests real-time weather metrics, streams them through a message broker, runs incremental multi-layer transformations, and serves a consolidated analytical reporting dashboard.
+An automated, event-driven data engineering pipeline that ingests real-time weather metrics, streams them through a message broker, runs multi-layer transformations, and serves a consolidated analytical reporting dashboard.
 
-This project implements a fully containerized **Medallion Architecture** (Bronze ➔ Silver ➔ Gold Data Lake layers) engineered for scalability, idempotency, and high-performance querying.
+## Tech Stack & Core Technologies
 
----
-
-## 🛠️ Tech Stack & Core Technologies
-
-- **Orchestration**: Apache Airflow (Configured in an optimized standalone execution environment inside Docker)
+- **Orchestration**: Apache Airflow
 - **Ingestion & Streaming**: OpenWeather API, Apache Kafka
 - **Processing Engines**: Apache Spark (Structured Streaming for incremental writes + Spark SQL Batch for analytics)
 - **Storage Layer**: Local Data Lake using compressed Apache Parquet formats
-- **Data Visualization**: Power BI Desktop (Connected directly to partitioned analytical gold layer outputs)
+- **Data Visualization**: Power BI Desktop
 - **Containerization**: Docker & Docker Compose
 
 ---
 
-## 📐 Data Flow & Architecture
+## Data Flow & Architecture
 
 ```text
 [ OpenWeather API ]
@@ -39,15 +35,14 @@ This project implements a fully containerized **Medallion Architecture** (Bronze
 
 ### Data Layer Lifecycle
 
-- **Bronze (Raw Ingestion)**: Weather JSON metrics for 10 major US cities are retrieved sequentially, adhering to API rate limits, and streamed directly into Kafka brokers.
-- **Silver (Cleaned & Incremental)**: PySpark consumes the streaming source incrementally using checkpoints (`availableNow=True`). The JSON payloads are explicitly parsed, cast to a structured schema, and appended to the Silver Parquet folder.
+- **Bronze (Raw Ingestion)**: Weather JSON metrics for 10 major US cities are retrieved, adhering to API rate limits, and streamed directly into Kafka.
+- **Silver (Cleaned & Incremental)**: PySpark consumes the streaming source incrementally using checkpoints. The JSON payloads are explicitly parsed, cast to a structured schema, and appended to the Silver Parquet folder.
 - **Gold (Analytical)**: A batch Spark process groups the historical Silver data by city and date, calculating daily averages, maximums, and minimums. The final state is rewritten safely utilizing partition pruning.
 
 ---
 
-## 🚀 Technical Challenges & Production Solutions
-
-Building an integrated distributed system locally introduces real-world infrastructure and data configuration friction. Below is a log of the main production roadblocks encountered and engineered during development:
+## Technical Challenges & Production Solutions
+Below is a log of the main production roadblocks encountered and engineered during development:
 
 ### 1. Docker Isolation & Kafka Advertised Listeners
 
@@ -63,7 +58,6 @@ Building an integrated distributed system locally introduces real-world infrastr
 
 ### 3. Windows Native Spark Execution and Missing Hadoop Binaries (`winutils.exe`)
 * **Issue**: Local testing of PySpark scripts natively on Windows caused a java.io.IOException: Cannot run program "winutils.exe" crash during file writes.
-  
 * **Cause**: Spark is built for Linux and expects POSIX-compliant file permissions (chmod). Windows (NTFS) lacks these native endpoints and requires translation tools (winutils.exe and hadoop.dll) to interact with local disk states.
 * **Solution**: Staged the minimal required Windows binaries from the public cdarlint/winutils repository in a local project folder. Injected a Python bootstrap script using the platform library to dynamically set HADOOP_HOME and system paths only when a Windows host is detected, maintaining a fully environment-agnostic pipeline.
 
