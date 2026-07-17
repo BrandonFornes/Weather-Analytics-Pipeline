@@ -2,7 +2,7 @@
 
 An automated, event-driven data engineering pipeline that ingests real-time weather metrics, streams them through a message broker, runs multi-layer transformations, and serves a consolidated analytical reporting dashboard.
 
-![Pipeline Demo](assets/demo.mp4)
+<video src="assets/demo" controls width="100%" max-width="800px"></video>
 ## Tech Stack & Core Technologies
 
 - **Orchestration**: Apache Airflow
